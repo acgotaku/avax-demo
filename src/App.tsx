@@ -1,24 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
+import { useCallback } from 'react';
+import { formatEther } from '@ethersproject/units';
+import { AbstractConnector } from '@web3-react/abstract-connector';
+import injected from 'connectors/injected';
+import walletConnect from 'connectors/walletconnect';
+import { useTryConnect } from 'hooks/useWeb3';
+import { useBalance } from 'hooks/useBalance';
+import { trimBalance } from 'utils';
 import './App.css';
 
 function App() {
+  const balance = useBalance();
+  const tryConnect = useTryConnect();
+  const connect = useCallback(
+    (connector: AbstractConnector) => {
+      tryConnect(connector);
+    },
+    [tryConnect]
+  );
+  const inject = () => {
+    connect(injected);
+  };
+  const wallet = () => {
+    connect(walletConnect);
+  };
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="balance">{trimBalance(formatEther(balance))}</div>
+      <div className="connect">
+        <button onClick={inject}>Inject MetaMask</button>
+        <button onClick={wallet}>WalletConnect</button>
+      </div>
     </div>
   );
 }
